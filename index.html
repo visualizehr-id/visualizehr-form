@@ -886,50 +886,55 @@ function buildRec() {
 function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
 function submitForm() {
-  // Collect all data
   const tujuan = getTujuan();
-  const jenis = getJenis();
-  const views = getViewCount();
+  const jenis  = getJenis();
+  const views  = getViewCount();
 
-  // Build Google Forms submission URL (no-cors iframe trick)
   const FORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSeWluF_xUiVuX2Rid6A6MV4v3aMzFaCHQUJlAAf2oizp6t-Vg/formResponse';
 
-  const params = new URLSearchParams({
-    'entry.1148693814': getVal('nama') || '',
-    'entry.2060839591': getVal('perusahaan') || '',
-    'entry.1629859653': getVal('email') || '',
-    'entry.882113059':  getVal('wa') || '',
-    'entry.120752443':  getRadio('profesi') || '',
-    'entry.2095383710': getRadio('frekuensi') || '',
-    'entry.771955092':  getRadio('tipe_proyek') || '',
-    'entry.2124486354': tujuan.join(', ') || '',
-    'entry.565817712':  jenis.join(', ') || '',
-    'entry.1265799652': views + ' view',
-    'entry.72618328':   getRadio('sumber') || '',
-  });
+  // Build iframe target — prevents page redirect
+  let iframe = document.getElementById('gf_iframe');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id   = 'gf_iframe';
+    iframe.name = 'gf_iframe';
+    iframe.style.cssText = 'display:none;position:absolute;';
+    document.body.appendChild(iframe);
+  }
 
-  // Submit via hidden iframe (avoids CORS redirect)
-  const iframe = document.createElement('iframe');
-  iframe.name = 'hidden_iframe';
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
+  // Build form with explicit individual hidden inputs
+  const gform = document.createElement('form');
+  gform.method  = 'POST';
+  gform.action  = FORM_ACTION;
+  gform.target  = 'gf_iframe';
+  gform.enctype = 'application/x-www-form-urlencoded';
+  gform.style.display = 'none';
 
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = FORM_ACTION;
-  form.target = 'hidden_iframe';
-  form.style.display = 'none';
+  function addField(name, value) {
+    const i = document.createElement('input');
+    i.type  = 'hidden';
+    i.name  = name;
+    i.value = value || '';
+    gform.appendChild(i);
+  }
 
-  params.forEach((val, key) => {
-    const inp = document.createElement('input');
-    inp.type = 'hidden';
-    inp.name = key;
-    inp.value = val;
-    form.appendChild(inp);
-  });
+  addField('entry.1148693814', getVal('nama'));
+  addField('entry.2060839591', getVal('perusahaan'));
+  addField('entry.1629859653', getVal('email'));
+  addField('entry.882113059',  getVal('wa'));
+  addField('entry.120752443',  getRadio('profesi'));
+  addField('entry.2095383710', getRadio('frekuensi'));
+  addField('entry.771955092',  getRadio('tipe_proyek'));
+  addField('entry.2124486354', tujuan.join(', '));
+  addField('entry.565817712',  jenis.join(', '));
+  addField('entry.1265799652', String(views) + ' view');
+  addField('entry.72618328',   getRadio('sumber'));
+  addField('fvv', '1');
+  addField('fbzx', Date.now().toString());
 
-  document.body.appendChild(form);
-  form.submit();
+  document.body.appendChild(gform);
+  gform.submit();
+  document.body.removeChild(gform);
 
   // Show confirm screen
   setTimeout(() => {
