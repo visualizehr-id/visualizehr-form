@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizehr — Membership Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #E8571A;
+    --orange-dim: rgba(232,87,26,0.12);
+    --black: #0F0F0E;
+    --dark: #1A1A18;
+    --border: rgba(255,255,255,0.08);
+    --border-active: rgba(232,87,26,0.5);
+    --text: #F2EFE8;
+    --text-dim: rgba(242,239,232,0.45);
+    --text-mid: rgba(242,239,232,0.7);
+    --surface: rgba(255,255,255,0.04);
+    --surface-hover: rgba(255,255,255,0.07);
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.6;
+  }
+  .accent-top { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: var(--orange); z-index: 100; }
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,15,14,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px; display: flex; align-items: center; justify-content: space-between; height: 60px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-mark { width: 28px; height: 28px; }
+  .logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--text); }
+  .logo-text span { color: var(--orange); }
+  .header-tag { font-size: 11px; font-weight: 300; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); }
+  .hero { padding: 72px 48px 56px; position: relative; }
+  .hero-label { font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--orange); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .hero-label::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--orange); }
+  .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 6vw, 72px); letter-spacing: 0.02em; line-height: 0.95; color: var(--text); margin-bottom: 20px; }
+  .hero-title em { color: var(--orange); font-style: normal; }
+  .hero-sub { font-size: 14px; font-weight: 300; color: var(--text-mid); line-height: 1.7; max-width: 520px; }
+  .progress-wrap { padding: 0 48px 40px; display: flex; align-items: center; gap: 0; }
+  .prog-step { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .prog-num { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text-dim); flex-shrink: 0; transition: all 0.3s; }
+  .prog-step.active .prog-num { background: var(--orange); border-color: var(--orange); color: white; }
+  .prog-step.done .prog-num { background: rgba(232,87,26,0.2); border-color: var(--orange); color: var(--orange); }
+  .prog-label { font-size: 11px; font-weight: 400; color: var(--text-dim); letter-spacing: 0.04em; transition: color 0.3s; }
+  .prog-step.active .prog-label { color: var(--text); }
+  .prog-step.done .prog-label { color: var(--orange); }
+  .prog-line { height: 1px; flex: 1; margin: 0 12px; background: var(--border); transition: background 0.3s; }
+  .main { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; }
+  .section { margin-bottom: 48px; display: none; }
+  .section.active { display: block; }
+  .section-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .section-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; line-height: 1; color: var(--orange); opacity: 0.25; letter-spacing: 0.02em; }
+  .section-title { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .section-desc { font-size: 12px; font-weight: 300; color: var(--text-dim); line-height: 1.6; }
+  .field-grid { display: grid; gap: 20px; }
+  .field-grid-2 { grid-template-columns: 1fr 1fr; }
+  .field-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-mid); display: flex; align-items: center; gap: 6px; }
+  .field-label .req { color: var(--orange); font-size: 12px; font-weight: 400; }
+  .field-hint { font-size: 11px; font-weight: 300; color: var(--text-dim); line-height: 1.5; margin-top: -4px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select, textarea {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; color: var(--text);
+    outline: none; transition: all 0.2s; width: 100%; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--border-active); background: rgba(232,87,26,0.04); box-shadow: 0 0 0 3px rgba(232,87,26,0.08); }
+  input::placeholder, textarea::placeholder { color: var(--text-dim); font-weight: 300; }
+  select option { background: var(--dark); color: var(--text); }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .choice-grid { display: grid; gap: 10px; }
+  .choice-grid-2 { grid-template-columns: 1fr 1fr; }
+  .choice-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .choice-grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .choice-item { position: relative; }
+  .choice-item input { display: none; }
+  .choice-label { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; background: var(--surface); }
+  .choice-label:hover { border-color: rgba(232,87,26,0.3); background: var(--surface-hover); }
+  .choice-item input:checked + .choice-label { border-color: var(--orange); background: var(--orange-dim); }
+  .choice-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .choice-sub { font-size: 11px; font-weight: 300; color: var(--text-dim); line-height: 1.4; }
+  .range-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 20px 16px; }
+  .range-display { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .range-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--orange); letter-spacing: 0.02em; }
+  .range-unit { font-size: 11px; color: var(--text-dim); font-weight: 300; }
+  .range-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-dim); font-weight: 300; }
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 2px; background: var(--border);
+    border: none; border-radius: 0; padding: 0; outline: none; cursor: pointer; margin-bottom: 8px;
+  }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 0 4px rgba(232,87,26,0.2); cursor: pointer; }
+  .view-manual { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .view-manual label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+  .view-manual input { max-width: 120px; }
+  .callout { background: rgba(232,87,26,0.06); border: 1px solid rgba(232,87,26,0.2); border-radius: 8px; padding: 14px 16px; font-size: 12px; font-weight: 300; color: var(--text-mid); line-height: 1.7; }
+  .callout b { font-weight: 500; color: var(--text); }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--border); }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; border-radius: 6px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em; text-transform: uppercase; }
+  .btn-primary { background: var(--orange); color: white; }
+  .btn-primary:hover { background: #D44A0F; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text-dim); padding: 13px 0; }
+  .btn-ghost:hover { color: var(--text); }
+
+  /* ── RECOMMENDATION CARDS (Section 4) ── */
+  .rec-intro { font-size: 13px; font-weight: 300; color: var(--text-mid); line-height: 1.7; margin-bottom: 24px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 0 8px 8px 0; }
+  .rec-intro b { font-weight: 500; color: var(--text); }
+  .rec-grid { display: grid; gap: 14px; }
+  .rec-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.25s; }
+  .rec-card.highlighted { border-color: var(--orange); }
+  .rec-card-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+  .rec-badge-wrap { display: flex; align-items: center; gap: 10px; }
+  .rec-badge { font-size: 9px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; }
+  .rb-best { background: var(--orange); color: white; }
+  .rb-alt  { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .rb-premium { background: rgba(232,87,26,0.15); color: var(--orange); }
+  .rec-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.04em; color: var(--text); }
+  .rec-use { font-size: 11px; font-weight: 300; color: var(--text-dim); margin-top: 3px; }
+  .rec-card-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+  .rec-col { padding: 14px 18px; border-right: 1px solid var(--border); }
+  .rec-col:last-child { border-right: none; }
+  .rec-col-label { font-size: 9px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .rec-item { font-size: 12px; color: var(--text); padding: 3px 0; line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .rec-item:last-child { border-bottom: none; }
+  .rec-item b { font-weight: 500; color: var(--text); }
+  .rec-item.accent { color: var(--orange); font-weight: 500; }
+  .rec-card-foot { padding: 12px 20px; background: rgba(255,255,255,0.02); border-top: 1px solid var(--border); font-size: 11px; font-weight: 300; color: var(--text-dim); line-height: 1.5; }
+  .rec-card-foot b { font-weight: 500; color: var(--text); }
+  .rec-empty { text-align: center; padding: 48px 20px; color: var(--text-dim); font-size: 13px; font-weight: 300; }
+
+  /* ── CONFIRM ── */
+  .confirm-wrap { display: none; text-align: center; padding: 80px 48px; }
+  .confirm-wrap.active { display: block; }
+  .confirm-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(232,87,26,0.12); border: 1px solid var(--orange); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 24px; }
+  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.04em; color: var(--text); margin-bottom: 12px; }
+  .confirm-sub { font-size: 14px; font-weight: 300; color: var(--text-mid); line-height: 1.7; max-width: 440px; margin: 0 auto 32px; }
+  .confirm-summary { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px 28px; text-align: left; max-width: 500px; margin: 0 auto; }
+  .cs-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .cs-row:last-child { border-bottom: none; }
+  .cs-key { color: var(--text-dim); font-weight: 300; }
+  .cs-val { color: var(--text); font-weight: 500; }
+
+  @media (max-width: 600px) {
+    .header { padding: 0 20px; }
+    .hero { padding: 48px 20px 32px; }
+    .progress-wrap { padding: 0 20px 28px; }
+    .main { padding: 0 20px 60px; }
+    .field-grid-2, .field-grid-3 { grid-template-columns: 1fr; }
+    .choice-grid-2, .choice-grid-3, .choice-grid-4 { grid-template-columns: 1fr 1fr; }
+    .rec-card-body { grid-template-columns: 1fr; }
+    .rec-col { border-right: none; border-bottom: 1px solid var(--border); }
+    .rec-col:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+<div class="accent-top"></div>
+
+<header class="header">
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 28 28" fill="none">
+      <path d="M4 22L10 6L14 14L18 6L24 22" stroke="#E8571A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 17H21" stroke="#E8571A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+    <span class="logo-text">VISUALIZE<span>HR</span></span>
+  </div>
+  <span class="header-tag">Begin Membership</span>
+</header>
+
+<div class="hero">
+  <div class="hero-label">Paket langganan render</div>
+  <h1 class="hero-title">Membership<br><em>Plan</em></h1>
+  <p class="hero-sub">Jawab beberapa pertanyaan singkat dan kami akan merekomendasikan paket yang paling sesuai kebutuhan Anda. Estimasi waktu: 3–4 menit.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="prog-step active" id="prog-1">
+    <div class="prog-num">1</div>
+    <span class="prog-label">Profil</span>
+  </div>
+  <div class="prog-line" id="line-1"></div>
+  <div class="prog-step" id="prog-2">
+    <div class="prog-num">2</div>
+    <span class="prog-label">Proyek</span>
+  </div>
+  <div class="prog-line" id="line-2"></div>
+  <div class="prog-step" id="prog-3">
+    <div class="prog-num">3</div>
+    <span class="prog-label">Output</span>
+  </div>
+  <div class="prog-line" id="line-3"></div>
+  <div class="prog-step" id="prog-4">
+    <div class="prog-num">4</div>
+    <span class="prog-label">Rekomendasi</span>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- SECTION 1 -->
+<div class="section active" id="sec-1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-info">
+      <div class="section-title">Profil Anda</div>
+      <div class="section-desc">Informasi dasar untuk memahami kebutuhan dan konteks penggunaan render Anda</div>
+    </div>
+  </div>
+  <div class="field-grid">
+    <div class="field-grid field-grid-2">
+      <div class="field">
+        <label class="field-label">Nama lengkap <span class="req">*</span></label>
+        <input type="text" id="nama" placeholder="Budi Santoso" />
+      </div>
+      <div class="field">
+        <label class="field-label">Perusahaan / Studio</label>
+        <input type="text" id="perusahaan" placeholder="PT Arsitek Nusantara" />
+      </div>
+    </div>
+    <div class="field-grid field-grid-2">
+      <div class="field">
+        <label class="field-label">Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="budi@arsitek.co.id" />
+      </div>
+      <div class="field">
+        <label class="field-label">WhatsApp <span class="req">*</span></label>
+        <input type="tel" id="wa" placeholder="+62 812 3456 7890" />
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Profesi / Peran Anda <span class="req">*</span></label>
+      <div class="choice-grid choice-grid-3">
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p1" value="Arsitek">
+          <label class="choice-label" for="p1"><span class="choice-title">Arsitek</span><span class="choice-sub">Biro arsitektur atau freelance</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p2" value="Interior Designer">
+          <label class="choice-label" for="p2"><span class="choice-title">Interior Designer</span><span class="choice-sub">Residential atau komersial</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p3" value="Developer / Owner">
+          <label class="choice-label" for="p3"><span class="choice-title">Developer / Owner</span><span class="choice-sub">Properti residensial / komersial</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p4" value="Kontraktor">
+          <label class="choice-label" for="p4"><span class="choice-title">Kontraktor</span><span class="choice-sub">Butuh render untuk presentasi</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p5" value="Agen Properti">
+          <label class="choice-label" for="p5"><span class="choice-title">Agen Properti</span><span class="choice-sub">Listing dan marketing material</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="profesi" id="p6" value="Lainnya">
+          <label class="choice-label" for="p6"><span class="choice-title">Lainnya</span><span class="choice-sub">Profesi lain</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Seberapa sering Anda butuh render?</label>
+      <div class="choice-grid choice-grid-2">
+        <div class="choice-item">
+          <input type="radio" name="frekuensi" id="f1" value="Satu kali">
+          <label class="choice-label" for="f1"><span class="choice-title">Satu kali / sementara</span><span class="choice-sub">Hanya untuk proyek ini</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="frekuensi" id="f2" value="Kadang-kadang">
+          <label class="choice-label" for="f2"><span class="choice-title">Kadang-kadang</span><span class="choice-sub">2–4 kali setahun</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="frekuensi" id="f3" value="Rutin bulanan">
+          <label class="choice-label" for="f3"><span class="choice-title">Rutin bulanan</span><span class="choice-sub">Ada proyek setiap bulan</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="frekuensi" id="f4" value="Sangat rutin">
+          <label class="choice-label" for="f4"><span class="choice-title">Sangat rutin</span><span class="choice-sub">Tiap minggu ada kebutuhan render</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Pernah menggunakan jasa rendering sebelumnya?</label>
+      <div class="choice-grid choice-grid-2">
+        <div class="choice-item">
+          <input type="radio" name="pengalaman" id="px1" value="Belum pernah">
+          <label class="choice-label" for="px1"><span class="choice-title">Belum pernah</span><span class="choice-sub">Ini pertama kalinya</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="pengalaman" id="px2" value="Pernah">
+          <label class="choice-label" for="px2"><span class="choice-title">Pernah</span><span class="choice-sub">Sudah ada pengalaman sebelumnya</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <span></span>
+    <button class="btn btn-primary" onclick="goTo(2)">Lanjut ke Proyek →</button>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section" id="sec-2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-info">
+      <div class="section-title">Detail Proyek</div>
+      <div class="section-desc">Ceritakan proyek yang akan divisualisasikan</div>
+    </div>
+  </div>
+  <div class="field-grid">
+    <div class="field">
+      <label class="field-label">Tipe Proyek <span class="req">*</span></label>
+      <div class="choice-grid choice-grid-3">
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp1" value="Residential">
+          <label class="choice-label" for="tp1"><span class="choice-title">Residential</span><span class="choice-sub">Rumah, villa, apartemen</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp2" value="Komersial">
+          <label class="choice-label" for="tp2"><span class="choice-title">Komersial</span><span class="choice-sub">Ruko, gedung, fasilitas</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp3" value="Interior">
+          <label class="choice-label" for="tp3"><span class="choice-title">Interior</span><span class="choice-sub">Ruang dalam, renovasi</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp4" value="Masterplan">
+          <label class="choice-label" for="tp4"><span class="choice-title">Masterplan</span><span class="choice-sub">Kawasan, perumahan, siteplan</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp5" value="Hospitality">
+          <label class="choice-label" for="tp5"><span class="choice-title">Hospitality</span><span class="choice-sub">Hotel, resort, restoran</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="tipe_proyek" id="tp6" value="Mixed Use">
+          <label class="choice-label" for="tp6"><span class="choice-title">Mixed Use</span><span class="choice-sub">Kombinasi beberapa tipe</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="field-grid field-grid-2">
+      <div class="field">
+        <label class="field-label">Luas Bangunan (m²)</label>
+        <input type="number" id="luas" placeholder="250" />
+        <span class="field-hint">Perkiraan saja — berpengaruh pada estimasi waktu modeling.</span>
+      </div>
+      <div class="field">
+        <label class="field-label">Jumlah Lantai</label>
+        <select id="lantai">
+          <option value="">Pilih...</option>
+          <option>1 lantai</option>
+          <option>2 lantai</option>
+          <option>3 lantai</option>
+          <option>4–10 lantai</option>
+          <option>10+ lantai</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">File yang tersedia</label>
+      <div class="choice-grid choice-grid-2">
+        <div class="choice-item">
+          <input type="checkbox" id="file2">
+          <label class="choice-label" for="file2"><span class="choice-title">Denah 2D (dwg / pdf)</span><span class="choice-sub">Perlu modeling dari denah</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" id="file3">
+          <label class="choice-label" for="file3"><span class="choice-title">Gambar referensi / foto</span><span class="choice-sub">Referensi visual yang ada</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" id="file5">
+          <label class="choice-label" for="file5"><span class="choice-title">File 3D (SketchUp / format lain)</span><span class="choice-sub">Model sudah tersedia sebagian</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" id="file4">
+          <label class="choice-label" for="file4"><span class="choice-title">Belum ada file apapun</span><span class="choice-sub">Masih dalam tahap konsep</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Tujuan penggunaan render <span class="req">*</span></label>
+      <div class="choice-grid choice-grid-2">
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj1" value="Presentasi klien">
+          <label class="choice-label" for="tuj1"><span class="choice-title">Presentasi ke klien</span><span class="choice-sub">Pitching / approval desain</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj2" value="Marketing & iklan">
+          <label class="choice-label" for="tuj2"><span class="choice-title">Marketing & iklan</span><span class="choice-sub">Brosur, banner, sosmed, ADS</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj3" value="Tender / lelang">
+          <label class="choice-label" for="tuj3"><span class="choice-title">Tender / lelang</span><span class="choice-sub">Dokumen penawaran proyek</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj4" value="Portofolio">
+          <label class="choice-label" for="tuj4"><span class="choice-title">Portofolio</span><span class="choice-sub">Showcase karya sendiri</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj5" value="Perizinan">
+          <label class="choice-label" for="tuj5"><span class="choice-title">Perizinan / IMB</span><span class="choice-sub">Keperluan dokumen formal</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="tujuan" id="tuj6" value="Penjualan properti">
+          <label class="choice-label" for="tuj6"><span class="choice-title">Penjualan properti</span><span class="choice-sub">Listing, brosur developer</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goTo(1)">← Kembali</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Lanjut ke Output →</button>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section" id="sec-3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-info">
+      <div class="section-title">Output yang Dibutuhkan</div>
+      <div class="section-desc">Tentukan jenis render dan perkiraan jumlah yang Anda butuhkan per bulan</div>
+    </div>
+  </div>
+  <div class="field-grid">
+    <div class="field">
+      <label class="field-label">Jenis render yang dibutuhkan <span class="req">*</span></label>
+      <div class="choice-grid choice-grid-2">
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis1" value="Interior">
+          <label class="choice-label" for="jenis1"><span class="choice-title">Interior rendering</span><span class="choice-sub">Ruang dalam — living, kamar, dapur, dll</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis2" value="Eksterior Residensial">
+          <label class="choice-label" for="jenis2"><span class="choice-title">Eksterior — residensial</span><span class="choice-sub">Tampak luar rumah, villa, hunian</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis3" value="Eksterior Komersial">
+          <label class="choice-label" for="jenis3"><span class="choice-title">Eksterior — komersial</span><span class="choice-sub">Gedung, ruko, fasilitas publik</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis4" value="Masterplan">
+          <label class="choice-label" for="jenis4"><span class="choice-title">Masterplan aerial</span><span class="choice-sub">Bird's eye view kawasan / siteplan</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis5" value="Video walkthrough">
+          <label class="choice-label" for="jenis5"><span class="choice-title">Video walkthrough</span><span class="choice-sub">Animasi bergerak 30–120 detik</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="checkbox" name="jenis" id="jenis6" value="Semua tipe">
+          <label class="choice-label" for="jenis6"><span class="choice-title">Campuran / semua tipe</span><span class="choice-sub">Tergantung proyek yang masuk</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Perkiraan jumlah view per bulan <span class="req">*</span></label>
+      <div class="range-wrap">
+        <div class="range-display">
+          <span class="range-val" id="range-display">5</span>
+          <span class="range-unit">view / bulan</span>
+        </div>
+        <input type="range" id="jumlah_view" min="1" max="30" value="5" oninput="updateRange(this.value)" />
+        <div class="range-labels">
+          <span>1</span><span>10</span><span>20</span><span>30+</span>
+        </div>
+      </div>
+      <div class="view-manual">
+        <label for="jumlah_manual">Atau isi sendiri:</label>
+        <input type="number" id="jumlah_manual" placeholder="contoh: 12" min="1" max="100"
+          oninput="syncManual(this.value)" />
+        <span class="field-hint" style="margin-top:0">view / bulan</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Dari mana Anda mengetahui Visualizehr?</label>
+      <div class="choice-grid choice-grid-3">
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s1" value="Instagram"><label class="choice-label" for="s1"><span class="choice-title">Instagram</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s2" value="Referral"><label class="choice-label" for="s2"><span class="choice-title">Referral / rekomendasi</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s3" value="Google"><label class="choice-label" for="s3"><span class="choice-title">Google Search</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s4" value="Upwork"><label class="choice-label" for="s4"><span class="choice-title">Upwork</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s5" value="LinkedIn"><label class="choice-label" for="s5"><span class="choice-title">LinkedIn</span></label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="sumber" id="s6" value="Lainnya"><label class="choice-label" for="s6"><span class="choice-title">Lainnya</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Catatan tambahan</label>
+      <textarea id="pesan_akhir" placeholder="Ekspektasi, pertanyaan, atau informasi tambahan..."></textarea>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goTo(2)">← Kembali</button>
+    <button class="btn btn-primary" onclick="buildRec(); goTo(4);">Lihat Rekomendasi →</button>
+  </div>
+</div>
+
+<!-- SECTION 4: REKOMENDASI -->
+<div class="section" id="sec-4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-info">
+      <div class="section-title">Rekomendasi Paket</div>
+      <div class="section-desc">Berdasarkan jawaban Anda, ini paket yang paling sesuai kebutuhan Anda</div>
+    </div>
+  </div>
+
+  <div id="rec-container">
+    <div class="rec-empty">Memuat rekomendasi...</div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn btn-ghost" onclick="goTo(3)">← Kembali</button>
+    <button class="btn btn-primary" onclick="submitForm()">Kirim & Hubungi Kami →</button>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-wrap" id="confirm">
+  <div class="confirm-icon">✓</div>
+  <h2 class="confirm-title">Terima Kasih!</h2>
+  <p class="confirm-sub">Brief Anda sudah kami terima. Tim kami akan menghubungi dalam <strong>1×24 jam</strong> dengan penawaran yang sesuai paket rekomendasi di atas.</p>
+  <div class="confirm-summary" id="confirm-summary"></div>
+  <p style="margin-top:24px;font-size:12px;color:var(--text-dim);font-weight:300">
+    Pertanyaan mendesak? WA kami langsung:<br>
+    <a href="https://wa.me/6281912093219" style="color:var(--orange);font-weight:500">+62 819 1209 3219</a>
+  </p>
+</div>
+
+</div><!-- .main -->
+
+<script>
+let currentSection = 1;
+const totalSections = 4;
+
+function goTo(n) {
+  document.getElementById('sec-' + currentSection).classList.remove('active');
+  document.getElementById('prog-' + currentSection).classList.remove('active');
+  if (n > currentSection) {
+    document.getElementById('prog-' + currentSection).classList.add('done');
+    const line = document.getElementById('line-' + currentSection);
+    if (line) line.style.background = 'var(--orange)';
+  } else {
+    document.getElementById('prog-' + currentSection).classList.remove('done');
+    const line = document.getElementById('line-' + currentSection);
+    if (line) line.style.background = 'var(--border)';
+  }
+  currentSection = n;
+  document.getElementById('sec-' + currentSection).classList.add('active');
+  document.getElementById('prog-' + currentSection).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateRange(val) {
+  document.getElementById('range-display').textContent = val;
+  const input = document.getElementById('jumlah_view');
+  const pct = ((val - 1) / 29) * 100;
+  input.style.background = `linear-gradient(to right, var(--orange) ${pct}%, var(--orange) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
+  document.getElementById('jumlah_manual').value = '';
+}
+function syncManual(val) {
+  if (!val) return;
+  const capped = Math.min(parseInt(val) || 1, 30);
+  document.getElementById('range-display').textContent = val;
+  const slider = document.getElementById('jumlah_view');
+  slider.value = capped;
+  const pct = ((capped - 1) / 29) * 100;
+  slider.style.background = `linear-gradient(to right, var(--orange) ${pct}%, var(--orange) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
+}
+updateRange(5);
+
+function getChecked(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value);
+}
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
+}
+function getCheckedIds(ids) {
+  return ids.filter(id => {
+    const el = document.getElementById(id);
+    return el && el.checked;
+  });
+}
+function getViewCount() {
+  const manual = document.getElementById('jumlah_manual').value;
+  return manual ? parseInt(manual) : parseInt(document.getElementById('jumlah_view').value);
+}
+function getTujuan() {
+  return ['tuj1','tuj2','tuj3','tuj4','tuj5','tuj6']
+    .filter(id => document.getElementById(id)?.checked)
+    .map(id => document.getElementById(id).value);
+}
+function getJenis() {
+  return ['jenis1','jenis2','jenis3','jenis4','jenis5','jenis6']
+    .filter(id => document.getElementById(id)?.checked)
+    .map(id => document.getElementById(id).value);
+}
+
+// ── RECOMMENDATION ENGINE ──
+function buildRec() {
+  const views = getViewCount();
+  const tujuan = getTujuan();
+  const jenis = getJenis();
+  const tipe = getRadio('tipe_proyek');
+  const frekuensi = getRadio('frekuensi');
+
+  const hasVideo = jenis.includes('Video walkthrough');
+  const hasMaster = jenis.includes('Masterplan') || tipe === 'Masterplan';
+  const hasKomersial = jenis.includes('Eksterior Komersial') || tipe === 'Komersial';
+  const forAds = tujuan.includes('Marketing & iklan');
+  const forTender = tujuan.includes('Tender / lelang');
+  const forSales = tujuan.includes('Penjualan properti');
+  const forPorto = tujuan.includes('Portofolio');
+
+  // Build package recommendations
+  const packages = [];
+
+  // ── PACKAGE LOGIC ──
+
+  // 1. Paket ADS / Marketing
+  if (forAds || forSales) {
+    packages.push({
+      badge: views >= 8 ? 'rb-best' : 'rb-alt',
+      badgeText: views >= 8 ? 'Paling cocok' : 'Alternatif',
+      name: 'Paket ADS',
+      use: 'Marketing, iklan properti, sosial media, brosur developer',
+      highlighted: forAds || forSales,
+      cols: [
+        {
+          label: 'Resolusi & output',
+          items: [
+            { text: 'Resolusi: <b>4K UHD (3840×2160px)</b>' },
+            { text: 'Format: JPG + PNG tanpa watermark' },
+            { text: 'Optimized untuk cetak & digital' },
+            { text: 'Color grade: vivid & punchy untuk iklan' },
+          ]
+        },
+        {
+          label: 'Kuantitas & inklusi',
+          items: [
+            { text: `<b>${Math.max(views, 4)} view</b> per bulan` },
+            { text: 'Entourage lengkap (orang, kendaraan, tanaman)' },
+            { text: 'Day + night version per view (jika diminta)' },
+            { text: 'Revisi: 2 round per view' },
+          ]
+        },
+        {
+          label: 'Cocok untuk',
+          items: [
+            { text: 'Iklan Facebook / Instagram / Google' },
+            { text: 'Brosur & flyer developer' },
+            { text: 'Billboard & media luar ruang' },
+            { text: 'Website listing properti', accent: true },
+          ]
+        }
+      ],
+      note: '<b>Tips:</b> Untuk ADS, prioritaskan eksterior dengan angle yang dramatis dan entourage lengkap. Interior bisa ditambahkan untuk showcase unit model.'
+    });
+  }
+
+  // 2. Paket Tender
+  if (forTender) {
+    packages.push({
+      badge: 'rb-best',
+      badgeText: 'Paling cocok',
+      name: 'Paket Tender',
+      use: 'Dokumen penawaran proyek, lelang pemerintah/swasta',
+      highlighted: true,
+      cols: [
+        {
+          label: 'Resolusi & output',
+          items: [
+            { text: 'Resolusi: <b>Full HD (1920×1080px)</b>' },
+            { text: 'Format: JPG + PDF siap cetak' },
+            { text: 'Watermark opsional dengan nama studio' },
+            { text: 'Color tone: netral, profesional' },
+          ]
+        },
+        {
+          label: 'Kuantitas & inklusi',
+          items: [
+            { text: `<b>${Math.max(views, 3)} view</b> per submission` },
+            { text: 'Eksterior perspektif utama wajib ada' },
+            { text: 'Masterplan aerial jika diperlukan' },
+            { text: 'Revisi: 1 round (dokumen formal)' },
+          ]
+        },
+        {
+          label: 'Cocok untuk',
+          items: [
+            { text: 'Tender proyek pemerintah (LPSE)' },
+            { text: 'Dokumen penawaran kontraktor' },
+            { text: 'Proposal developer ke investor' },
+            { text: 'Presentasi konsultan perencana', accent: true },
+          ]
+        }
+      ],
+      note: '<b>Catatan:</b> Paket tender biasanya butuh turnaround lebih cepat karena deadline submission. Informasikan tanggal tender saat pemesanan.'
+    });
+  }
+
+  // 3. Paket Presentasi / Pitching
+  if (tujuan.includes('Presentasi klien') || tujuan.includes('Portofolio')) {
+    packages.push({
+      badge: forPorto && !forAds && !forTender ? 'rb-best' : 'rb-alt',
+      badgeText: forPorto && !forAds && !forTender ? 'Paling cocok' : 'Alternatif',
+      name: 'Paket Presentasi',
+      use: 'Pitching ke klien, approval desain, portofolio studio',
+      highlighted: !forAds && !forTender,
+      cols: [
+        {
+          label: 'Resolusi & output',
+          items: [
+            { text: 'Resolusi: <b>2K (2560×1440px)</b>' },
+            { text: 'Format: JPG + PNG' },
+            { text: 'Mood: photorealistic, bersih' },
+            { text: 'Aspect ratio fleksibel (16:9 / 4:3)' },
+          ]
+        },
+        {
+          label: 'Kuantitas & inklusi',
+          items: [
+            { text: `<b>${Math.max(views, 4)} view</b> per bulan` },
+            { text: 'Mix interior + eksterior' },
+            { text: 'Revisi: 2 round per view' },
+            { text: 'WIP preview sebelum final' },
+          ]
+        },
+        {
+          label: 'Cocok untuk',
+          items: [
+            { text: 'Meeting presentasi ke klien' },
+            { text: 'Approval material & desain' },
+            { text: 'Portofolio arsitek & interior' },
+            { text: 'Kompetisi desain', accent: true },
+          ]
+        }
+      ],
+      note: '<b>Tips:</b> Untuk pitching, pilih 1–2 view eksterior terbaik dan 2–3 view interior yang paling representatif. Kualitas lebih penting dari kuantitas.'
+    });
+  }
+
+  // 4. Paket Video (jika pilih video)
+  if (hasVideo) {
+    packages.push({
+      badge: 'rb-premium',
+      badgeText: 'Add-on premium',
+      name: 'Paket Video',
+      use: 'Video walkthrough animasi untuk marketing atau presentasi',
+      highlighted: false,
+      cols: [
+        {
+          label: 'Resolusi & output',
+          items: [
+            { text: 'Resolusi: <b>Full HD 1080p / 4K</b>' },
+            { text: 'Format: MP4 (H.264 / H.265)' },
+            { text: 'Frame rate: 30fps standard' },
+            { text: 'Dengan background music berlisensi' },
+          ]
+        },
+        {
+          label: 'Durasi & inklusi',
+          items: [
+            { text: 'Pilihan durasi: <b>30 / 60 / 90 detik</b>' },
+            { text: 'Storyboard & shot list pre-approved' },
+            { text: 'Revisi: 1 round (minor adjustment)' },
+            { text: 'Delivery 7–14 hari per video' },
+          ]
+        },
+        {
+          label: 'Cocok untuk',
+          items: [
+            { text: 'Video marketing properti' },
+            { text: 'Reel Instagram & YouTube' },
+            { text: 'Presentasi investor / developer' },
+            { text: 'Pameran properti', accent: true },
+          ]
+        }
+      ],
+      note: '<b>Catatan:</b> Video dihitung terpisah dari jatah view still image. 30 detik video = setara 3 view dalam sistem langganan Studio.'
+    });
+  }
+
+  // 5. Fallback jika tidak ada tujuan spesifik
+  if (packages.length === 0) {
+    packages.push({
+      badge: 'rb-best',
+      badgeText: 'Rekomendasi umum',
+      name: 'Paket Starter',
+      use: 'Paket fleksibel untuk berbagai kebutuhan rendering',
+      highlighted: true,
+      cols: [
+        {
+          label: 'Resolusi & output',
+          items: [
+            { text: 'Resolusi: <b>Full HD (1920×1080px)</b>' },
+            { text: 'Format: JPG + PNG' },
+            { text: 'Photorealistic, clean output' },
+            { text: 'Color grade standar' },
+          ]
+        },
+        {
+          label: 'Kuantitas & inklusi',
+          items: [
+            { text: `<b>${Math.max(views, 4)} view</b> per bulan` },
+            { text: 'Interior dan/atau eksterior' },
+            { text: 'Revisi: 2 round per view' },
+            { text: 'Delivery 3–7 hari kerja' },
+          ]
+        },
+        {
+          label: 'Cocok untuk',
+          items: [
+            { text: 'Kebutuhan render umum' },
+            { text: 'Presentasi dan portofolio' },
+            { text: 'Proyek residential & komersial' },
+            { text: 'First-time subscriber', accent: true },
+          ]
+        }
+      ],
+      note: 'Ceritakan lebih detail tujuan penggunaan render Anda saat menghubungi kami — kami akan sesuaikan spesifikasi output.'
+    });
+  }
+
+  // Render cards
+  const container = document.getElementById('rec-container');
+
+  let intro = `Berdasarkan kebutuhan Anda (<b>${views} view/bulan</b>`;
+  if (tujuan.length) intro += `, tujuan: <b>${tujuan.join(', ')}</b>`;
+  intro += `), berikut rekomendasi paket yang paling sesuai:`;
+
+  let html = `<div class="rec-intro">${intro}</div><div class="rec-grid">`;
+
+  packages.forEach(pkg => {
+    html += `
+    <div class="rec-card ${pkg.highlighted ? 'highlighted' : ''}">
+      <div class="rec-card-head">
+        <div>
+          <div class="rec-badge-wrap">
+            <span class="rec-badge ${pkg.badge}">${pkg.badgeText}</span>
+          </div>
+          <div class="rec-name" style="margin-top:8px">${pkg.name}</div>
+          <div class="rec-use">${pkg.use}</div>
+        </div>
+      </div>
+      <div class="rec-card-body">`;
+
+    pkg.cols.forEach(col => {
+      html += `<div class="rec-col"><div class="rec-col-label">${col.label}</div>`;
+      col.items.forEach(item => {
+        html += `<div class="rec-item ${item.accent ? 'accent' : ''}">${item.text}</div>`;
+      });
+      html += `</div>`;
+    });
+
+    html += `</div>
+      <div class="rec-card-foot">${pkg.note}</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function submitForm() {
+  for (let i = 1; i <= 4; i++) document.getElementById('sec-' + i).classList.remove('active');
+  document.querySelector('.progress-wrap').style.display = 'none';
+  document.querySelector('.hero').style.display = 'none';
+  for (let i = 1; i <= 4; i++) {
+    const p = document.getElementById('prog-' + i);
+    if (p) { p.classList.remove('active'); p.classList.add('done'); }
+  }
+  const tujuan = getTujuan();
+  const jenis = getJenis();
+  const summary = document.getElementById('confirm-summary');
+  const rows = [
+    ['Nama', getVal('nama') || '—'],
+    ['WhatsApp', getVal('wa') || '—'],
+    ['Tipe proyek', getRadio('tipe_proyek') || '—'],
+    ['Jenis render', jenis.length ? jenis.join(', ') : '—'],
+    ['Jumlah view/bulan', getViewCount() + ' view'],
+    ['Tujuan', tujuan.length ? tujuan.join(', ') : '—'],
+    ['Sumber info', getRadio('sumber') || '—'],
+  ];
+  summary.innerHTML = rows.map(([k,v]) =>
+    `<div class="cs-row"><span class="cs-key">${k}</span><span class="cs-val">${v}</span></div>`
+  ).join('');
+  document.getElementById('confirm').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
