@@ -165,9 +165,11 @@
 
 <header class="header">
   <div class="logo">
-    <svg class="logo-mark" viewBox="0 0 28 28" fill="none">
-      <path d="M4 22L10 6L14 14L18 6L24 22" stroke="#E8571A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M7 17H21" stroke="#E8571A" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+    <svg class="logo-mark" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left vertical bar: rounded top, bottom tapered -->
+      <path d="M13 12 C13 9.8 14.8 8 17 8 L20 8 C20 8 20 8 20 8 L20 40 C20 41.5 18.8 43.5 17 44 C15 44.5 13 43 13 41 Z" fill="#E8571A"/>
+      <!-- Right diagonal slash: flat top, angled body, pointed bottom -->
+      <path d="M25 8 L41 8 C43 8 44 9.5 43 11.5 L29 50 C28.2 52 26 51.5 25 50 L23 46 L36 11 L25 11 Z" fill="#E8571A"/>
     </svg>
     <span class="logo-text">VISUALIZE<span>HR</span></span>
   </div>
@@ -884,30 +886,76 @@ function buildRec() {
 function getVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
 function submitForm() {
-  for (let i = 1; i <= 4; i++) document.getElementById('sec-' + i).classList.remove('active');
-  document.querySelector('.progress-wrap').style.display = 'none';
-  document.querySelector('.hero').style.display = 'none';
-  for (let i = 1; i <= 4; i++) {
-    const p = document.getElementById('prog-' + i);
-    if (p) { p.classList.remove('active'); p.classList.add('done'); }
-  }
+  // Collect all data
   const tujuan = getTujuan();
   const jenis = getJenis();
-  const summary = document.getElementById('confirm-summary');
-  const rows = [
-    ['Nama', getVal('nama') || '—'],
-    ['WhatsApp', getVal('wa') || '—'],
-    ['Tipe proyek', getRadio('tipe_proyek') || '—'],
-    ['Jenis render', jenis.length ? jenis.join(', ') : '—'],
-    ['Jumlah view/bulan', getViewCount() + ' view'],
-    ['Tujuan', tujuan.length ? tujuan.join(', ') : '—'],
-    ['Sumber info', getRadio('sumber') || '—'],
-  ];
-  summary.innerHTML = rows.map(([k,v]) =>
-    `<div class="cs-row"><span class="cs-key">${k}</span><span class="cs-val">${v}</span></div>`
-  ).join('');
-  document.getElementById('confirm').classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const views = getViewCount();
+
+  // Build Google Forms submission URL (no-cors iframe trick)
+  const FORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSeWluF_xUiVuX2Rid6A6MV4v3aMzFaCHQUJlAAf2oizp6t-Vg/formResponse';
+
+  const params = new URLSearchParams({
+    'entry.1148693814': getVal('nama') || '',
+    'entry.2060839591': getVal('perusahaan') || '',
+    'entry.1629859653': getVal('email') || '',
+    'entry.882113059':  getVal('wa') || '',
+    'entry.120752443':  getRadio('profesi') || '',
+    'entry.2095383710': getRadio('frekuensi') || '',
+    'entry.771955092':  getRadio('tipe_proyek') || '',
+    'entry.2124486354': tujuan.join(', ') || '',
+    'entry.565817712':  jenis.join(', ') || '',
+    'entry.1265799652': views + ' view',
+    'entry.72618328':   getRadio('sumber') || '',
+  });
+
+  // Submit via hidden iframe (avoids CORS redirect)
+  const iframe = document.createElement('iframe');
+  iframe.name = 'hidden_iframe';
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = FORM_ACTION;
+  form.target = 'hidden_iframe';
+  form.style.display = 'none';
+
+  params.forEach((val, key) => {
+    const inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = key;
+    inp.value = val;
+    form.appendChild(inp);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+
+  // Show confirm screen
+  setTimeout(() => {
+    for (let i = 1; i <= 4; i++) document.getElementById('sec-' + i).classList.remove('active');
+    document.querySelector('.progress-wrap').style.display = 'none';
+    document.querySelector('.hero').style.display = 'none';
+    for (let i = 1; i <= 4; i++) {
+      const p = document.getElementById('prog-' + i);
+      if (p) { p.classList.remove('active'); p.classList.add('done'); }
+    }
+    const summary = document.getElementById('confirm-summary');
+    const rows = [
+      ['Nama', getVal('nama') || '—'],
+      ['WhatsApp', getVal('wa') || '—'],
+      ['Tipe proyek', getRadio('tipe_proyek') || '—'],
+      ['Jenis render', jenis.length ? jenis.join(', ') : '—'],
+      ['Jumlah view/bulan', views + ' view'],
+      ['Tujuan', tujuan.length ? tujuan.join(', ') : '—'],
+      ['Sumber info', getRadio('sumber') || '—'],
+    ];
+    summary.innerHTML = rows.map(([k,v]) =>
+      `<div class="cs-row"><span class="cs-key">${k}</span><span class="cs-val">${v}</span></div>`
+    ).join('');
+    document.getElementById('confirm').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 500);
 }
 </script>
 </body>
