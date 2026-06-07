@@ -890,60 +890,76 @@ function submitForm() {
   const jenis  = getJenis();
   const views  = getViewCount();
 
-  const FORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSeWluF_xUiVuX2Rid6A6MV4v3aMzFaCHQUJlAAf2oizp6t-Vg/formResponse';
+  // ── FORMSPREE ENDPOINT ──
+  // Ganti YOUR_FORM_ID dengan ID dari formspree.io/new
+  const ENDPOINT = 'https://formspree.io/f/maqzebqr';
 
-  // Build URL-encoded body manually
-  const fields = [
-    ['entry.1148693814', getVal('nama')],
-    ['entry.2060839591', getVal('perusahaan')],
-    ['entry.1629859653', getVal('email')],
-    ['entry.882113059',  getVal('wa')],
-    ['entry.120752443',  getRadio('profesi')],
-    ['entry.2095383710', getRadio('frekuensi')],
-    ['entry.771955092',  getRadio('tipe_proyek')],
-    ['entry.2124486354', tujuan.join(', ')],
-    ['entry.565817712',  jenis.join(', ')],
-    ['entry.1265799652', String(views) + ' view'],
-    ['entry.72618328',   getRadio('sumber')],
-  ];
+  const payload = {
+    nama:        getVal('nama'),
+    perusahaan:  getVal('perusahaan'),
+    email:       getVal('email'),
+    whatsapp:    getVal('wa'),
+    profesi:     getRadio('profesi'),
+    frekuensi:   getRadio('frekuensi'),
+    tipe_proyek: getRadio('tipe_proyek'),
+    tujuan:      tujuan.join(', '),
+    jenis_render:jenis.join(', '),
+    jumlah_view: views + ' view/bulan',
+    sumber:      getRadio('sumber'),
+    catatan:     getVal('pesan_akhir'),
+    _subject:    'New Membership Inquiry - Visualizehr',
+    _replyto:    getVal('email'),
+  };
 
-  const body = fields
-    .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v || ''))
-    .join('&');
+  // Show loading state on button
+  const btn = document.querySelector('#sec-4 .btn-primary');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Mengirim...'; btn.disabled = true; }
 
-  // fetch no-cors — will not return response but DOES submit the data
-  fetch(FORM_ACTION, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body
-  }).catch(() => {}); // ignore CORS error silently
-
-  // Show confirm screen
-  setTimeout(() => {
-    for (let i = 1; i <= 4; i++) document.getElementById('sec-' + i).classList.remove('active');
-    document.querySelector('.progress-wrap').style.display = 'none';
-    document.querySelector('.hero').style.display = 'none';
-    for (let i = 1; i <= 4; i++) {
-      const p = document.getElementById('prog-' + i);
-      if (p) { p.classList.remove('active'); p.classList.add('done'); }
+  fetch(ENDPOINT, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body:    JSON.stringify(payload),
+  })
+  .then(res => {
+    if (res.ok) {
+      showConfirm(tujuan, jenis, views);
+    } else {
+      res.json().then(data => {
+        alert('Gagal mengirim: ' + (data.error || 'Unknown error'));
+        if (btn) { btn.textContent = origText; btn.disabled = false; }
+      });
     }
-    const summary = document.getElementById('confirm-summary');
-    const rows = [
-      ['Nama', getVal('nama') || '—'],
-      ['WhatsApp', getVal('wa') || '—'],
-      ['Tipe proyek', getRadio('tipe_proyek') || '—'],
-      ['Jenis render', jenis.length ? jenis.join(', ') : '—'],
-      ['Jumlah view/bulan', views + ' view'],
-      ['Tujuan', tujuan.length ? tujuan.join(', ') : '—'],
-      ['Sumber info', getRadio('sumber') || '—'],
-    ];
-    summary.innerHTML = rows.map(([k,v]) =>
-      `<div class="cs-row"><span class="cs-key">${k}</span><span class="cs-val">${v}</span></div>`
-    ).join('');
-    document.getElementById('confirm').classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 500);
+  })
+  .catch(() => {
+    alert('Koneksi bermasalah. Coba lagi.');
+    if (btn) { btn.textContent = origText; btn.disabled = false; }
+  });
+}
+
+function showConfirm(tujuan, jenis, views) {
+  for (let i = 1; i <= 4; i++) document.getElementById('sec-' + i).classList.remove('active');
+  document.querySelector('.progress-wrap').style.display = 'none';
+  document.querySelector('.hero').style.display = 'none';
+  for (let i = 1; i <= 4; i++) {
+    const p = document.getElementById('prog-' + i);
+    if (p) { p.classList.remove('active'); p.classList.add('done'); }
+  }
+  const summary = document.getElementById('confirm-summary');
+  const rows = [
+    ['Nama',           getVal('nama')               || '—'],
+    ['WhatsApp',       getVal('wa')                 || '—'],
+    ['Tipe proyek',    getRadio('tipe_proyek')       || '—'],
+    ['Jenis render',   jenis.length ? jenis.join(', ') : '—'],
+    ['Jumlah view',    views + ' view/bulan'],
+    ['Tujuan',         tujuan.length ? tujuan.join(', ') : '—'],
+    ['Sumber info',    getRadio('sumber')            || '—'],
+  ];
+  summary.innerHTML = rows.map(([k,v]) =>
+    `<div class="cs-row"><span class="cs-key">${k}</span><span class="cs-val">${v}</span></div>`
+  ).join('');
+  document.getElementById('confirm').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 </body>
