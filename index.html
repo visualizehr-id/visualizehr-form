@@ -481,6 +481,52 @@
     </div>
 
     <div class="field">
+      <label class="field-label">Budget langganan per bulan <span class="req">*</span></label>
+      <span class="field-hint" style="margin-bottom:10px;display:block">Pilih range yang paling sesuai — informasi ini hanya digunakan untuk menyiapkan penawaran yang tepat.</span>
+      <div class="choice-grid choice-grid-4">
+        <div class="choice-item">
+          <input type="radio" name="budget_range" id="br1" value="< Rp 5 juta">
+          <label class="choice-label" for="br1">
+            <span class="choice-title" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.02em">&lt; 5jt</span>
+            <span class="choice-sub">per bulan</span>
+          </label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="budget_range" id="br2" value="Rp 5 - 15 juta">
+          <label class="choice-label" for="br2">
+            <span class="choice-title" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.02em">5 – 15jt</span>
+            <span class="choice-sub">per bulan</span>
+          </label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="budget_range" id="br3" value="Rp 15 - 30 juta">
+          <label class="choice-label" for="br3">
+            <span class="choice-title" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.02em">15 – 30jt</span>
+            <span class="choice-sub">per bulan</span>
+          </label>
+        </div>
+        <div class="choice-item">
+          <input type="radio" name="budget_range" id="br4" value="> Rp 30 juta">
+          <label class="choice-label" for="br4">
+            <span class="choice-title" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.02em">&gt; 30jt</span>
+            <span class="choice-sub">per bulan</span>
+          </label>
+        </div>
+      </div>
+      <div id="budget-detail-wrap" style="margin-top:12px;">
+        <label class="field-label" style="margin-bottom:6px;margin-top:4px">Atau isi nominal sendiri <span style="color:var(--text-dim);font-weight:300;text-transform:none;letter-spacing:0;font-size:11px">(opsional)</span></label>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:500;color:var(--text-mid);flex-shrink:0">Rp</span>
+          <input type="number" id="budget_detail" placeholder="Contoh: 8.500.000"
+            style="max-width:220px;flex:1"
+            oninput="formatBudgetHint(this.value)"/>
+          <span style="font-size:11px;color:var(--text-dim)">/ bulan</span>
+        </div>
+        <div id="budget-hint-text" style="font-size:11px;color:var(--orange);margin-top:6px;font-weight:500;display:none;"></div>
+      </div>
+    </div>
+
+    <div class="field">
       <label class="field-label">Dari mana Anda mengetahui Visualizehr?</label>
       <div class="choice-grid choice-grid-3">
         <div class="choice-item">
@@ -588,6 +634,32 @@ function syncManual(val) {
   slider.style.background = `linear-gradient(to right, var(--orange) ${pct}%, var(--orange) ${pct}%, var(--border) ${pct}%, var(--border) 100%)`;
 }
 updateRange(5);
+
+// Format budget hint display
+function formatBudgetHint(val) {
+  var hint = document.getElementById('budget-hint-text');
+  if (!hint) return;
+  var num = parseInt(val);
+  if (!val || isNaN(num) || num <= 0) { hint.style.display = 'none'; return; }
+  var formatted;
+  if (num >= 1000000000) formatted = (num/1000000000).toFixed(1).replace('.0','') + ' Miliar';
+  else if (num >= 1000000) formatted = (num/1000000).toFixed(1).replace('.0','') + ' Juta';
+  else if (num >= 1000) formatted = (num/1000).toFixed(0) + ' Ribu';
+  else formatted = num.toLocaleString('id-ID');
+  hint.textContent = '= Rp ' + formatted + ' per bulan';
+  hint.style.display = 'block';
+}
+
+// Show budget detail when range selected
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('input[name="budget_range"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var wrap = document.getElementById('budget-detail-wrap');
+      if (wrap) wrap.style.display = 'block';
+    });
+  });
+});
 
 function getChecked(name) {
   return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value);
@@ -907,6 +979,17 @@ function submitForm() {
     jumlah_view: views + ' view/bulan',
     sumber:      getRadio('sumber'),
     catatan:     getVal('pesan_akhir'),
+    budget_range:  getRadio('budget_range'),
+    budget_detail: (function(){
+      var v = getVal('budget_detail');
+      if (!v || isNaN(parseInt(v))) return '';
+      var n = parseInt(v);
+      var fmt;
+      if (n >= 1000000000) fmt = (n/1000000000).toFixed(1).replace('.0','') + ' Miliar';
+      else if (n >= 1000000) fmt = (n/1000000).toFixed(1).replace('.0','') + ' Juta';
+      else fmt = n.toLocaleString('id-ID');
+      return 'Rp ' + fmt + ' / bulan';
+    })(),
     _subject:    'New Membership Inquiry - Visualizehr',
     _replyto:    getVal('email'),
   };
@@ -953,6 +1036,8 @@ function showConfirm(tujuan, jenis, views) {
     ['Jenis render',   jenis.length ? jenis.join(', ') : '—'],
     ['Jumlah view',    views + ' view/bulan'],
     ['Tujuan',         tujuan.length ? tujuan.join(', ') : '—'],
+    ['Budget/bulan',   getRadio('budget_range')       || '—'],
+    ['Budget/bulan',   getRadio('budget_range')       || '—'],
     ['Sumber info',    getRadio('sumber')            || '—'],
   ];
   summary.innerHTML = rows.map(([k,v]) =>
